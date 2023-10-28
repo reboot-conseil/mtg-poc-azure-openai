@@ -1,5 +1,6 @@
 ﻿using IASquad.Poc.AzureOpenAi.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
 namespace IASquad.Poc.AzureOpenAi.Controllers;

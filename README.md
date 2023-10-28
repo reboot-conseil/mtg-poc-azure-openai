@@ -19,3 +19,22 @@ Yohann
 ## Did we reach the goal ?
 
 ## Conclusion
+
+
+# Infos générales
+
+Ce projet utilise les secrets de .NET.
+Pour les mettre, faire un clic droit dans Visual Studio sur le projet `IASquad.Poc.AzureOpenAi` et cliquer sur __Manage User Secrets__
+La structure a rentrer pour que le projet fonctionne est comme suit:
+```json
+{
+  "AzureOpenAi": {
+    "Url": "<OpenAI Url>",
+    "Key": "<OpenAI Secret>"
+  }
+}
+```
+
+Les infos peuvent être trouvées sur l'instance Azure OpenAI dans la section `Keys and Endpoint`
+
+On peut aussi mettre ces infos dans l'appsettings.json, cependant, ce faisant, les endpoints et clés seront alors public dans le repository.
