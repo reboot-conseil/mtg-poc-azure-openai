@@ -15,7 +15,7 @@ public class ImageService : IImageService
         _openAIClient = openAIClient;
     }
 
-    public async Task<string> GetImage(string prompt, ImageSize size)
+    public async Task<string> GetImageAsync(string prompt, ImageSize size)
     {
         Response<ImageGenerations> imageGenerations = await _openAIClient.GetImageGenerationsAsync(
             new ImageGenerationOptions()

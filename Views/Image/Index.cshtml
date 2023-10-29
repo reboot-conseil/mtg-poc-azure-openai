@@ -1,0 +1,42 @@
+﻿@model IASquad.Poc.AzureOpenAi.Models.Image.ImageIndexViewModel
+@{
+    ViewData["Title"] = "Your Image Application";
+    var sizeItems = new List<SelectListItem>
+    {
+        new SelectListItem
+        {
+            Text = "256 x 256",
+            Value = "256",
+        },
+        new SelectListItem
+        {
+            Text = "512 x 512",
+            Value = "512",
+        },
+        new SelectListItem
+        {
+            Text = "1024 x 1024",
+            Value = "1024",
+            Selected = true,
+        },
+    };
+}
+
+<div class="container">
+    <form asp-action="Generate">
+        <div class="mb-3">
+            <label for="prompt" class="form-label">Prompt</label>
+            <input type="text" class="form-control" id="prompt" aria-describedby="promptForImage" asp-for="Prompt"/>
+            <div id="promptForImage" class="form-text">What image do you want to generate?</div>
+        </div>
+        <div class="mb-3">
+            <select class="form-select" aria-label="Size selection" asp-for="Size" asp-items ="sizeItems"></select>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Generate"/>
+    </form>
+    @if(!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <img src="@Model.ImageUrl" alt="@Model.Prompt"/>
+    }
+</div>
+

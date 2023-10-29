@@ -5,5 +5,5 @@ namespace IASquad.Poc.AzureOpenAi.Services.Interfaces;
 
 public interface IImageService
 {
-    Task<string> GetImage(string prompt, ImageSize size);
+    Task<string> GetImageAsync(string prompt, ImageSize size);
 }
