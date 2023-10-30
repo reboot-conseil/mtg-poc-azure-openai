@@ -1,6 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using IASquad.Poc.AzureOpenAi.Data.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace IASquad.Poc.AzureOpenAi.Data;
 
@@ -11,8 +10,11 @@ public class AppDbContext : DbContext
     {
     }
 
+    public DbSet<Message> Messages { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Message>().ToTable("Messages");
     }
 
 }
