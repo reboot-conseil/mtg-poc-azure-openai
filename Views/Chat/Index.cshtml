@@ -6,16 +6,11 @@
     <form asp-action="Chat">
         <div class="mb-3">
             <label for="prompt" class="form-label">Prompt</label>
-            <input type="text" class="form-control" id="prompt" aria-describedby="promptForImage" asp-for="Prompt" />
+            <input type="text" class="form-control" id="prompt" aria-describedby="promptForImage" />
             <div id="promptForImage" class="form-text">What image do you want to generate?</div>
         </div>
         <div class="mb-3">
-            <select class="form-select" aria-label="Size selection" asp-for="Size" asp-items="sizeItems"></select>
         </div>
         <input type="submit" class="btn btn-primary" value="Generate" />
     </form>
-    @if (!string.IsNullOrEmpty(Model.ImageUrl))
-    {
-        <img src="@Model.ImageUrl" alt="@Model.Prompt" />
-    }
 </div>

@@ -17,9 +17,10 @@ public class ImageController : Controller
     }
 
     [HttpGet]
-    public IActionResult Index([FromQuery] ImageIndexViewModel model)
+    public IActionResult Index([FromQuery(Name = "url")] string url)
     {
-        return View(model);
+        ViewData["Url"] = url;
+        return View();
     }
 
     [HttpPost("Generate")]
@@ -40,13 +41,7 @@ public class ImageController : Controller
         }
 
         var url = await _imageService.GetImageAsync(model.Prompt, imageSize);
-        var vm = new ImageIndexViewModel
-        {
-            Prompt = model.Prompt,
-            ImageUrl = url,
-            Size = model.Size,
-        };
 
-        return RedirectToAction("Index", vm);
+        return RedirectToAction("Index", new { url });
     }
 }

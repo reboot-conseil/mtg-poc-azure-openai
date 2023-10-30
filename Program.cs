@@ -1,8 +1,10 @@
 using Azure;
 using Azure.AI.OpenAI;
+using IASquad.Poc.AzureOpenAi.Data;
 using IASquad.Poc.AzureOpenAi.Services;
 using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,6 +22,9 @@ builder.Services.AddScoped(client =>
 // Register Application Services
 builder.Services.AddScoped<IChatService, ChatService>();
 builder.Services.AddScoped<IImageService, ImageService>();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+  options.UseSqlite(builder.Configuration.GetConnectionString("AppDbContext")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
