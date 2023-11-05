@@ -1,5 +1,7 @@
-﻿using IASquad.Poc.AzureOpenAi.Services.Interfaces;
+﻿using IASquad.Poc.AzureOpenAi.Models.Chat;
+using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace IASquad.Poc.AzureOpenAi.Controllers;
 
@@ -12,5 +14,13 @@ public class ChatController : ControllerBase
     public ChatController(IChatService chatService)
     {
         _chatService = chatService;
+    }
+
+    [HttpPost("ask")]
+    public async Task<ActionResult<string>> AskAsync([FromBody] ChatAskViewModel model)
+    {
+        var response = await _chatService.GetChatCompletionAsync(model.SystemPrompts, model.Question);
+
+        return Ok(response);
     }
 }

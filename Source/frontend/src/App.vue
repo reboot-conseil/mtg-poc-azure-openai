@@ -3,10 +3,13 @@
     <v-navigation-drawer class="bg-grey-lighten-5" permanent>
       <v-list nav class="nav">
         <v-list-item></v-list-item>
+        <router-link :to="{ name: 'home' }">
+          <v-list-item class="nav-item" prepend-icon="mdi-home" title="Accueil" density="comfortable"></v-list-item>
+        </router-link>
         <router-link :to="{ name: 'dalle' }">
           <v-list-item class="nav-item" prepend-icon="mdi-image-edit" title="Dall-E" density="comfortable"></v-list-item>
         </router-link>
-        <router-link :to="{ name: 'home' }">
+        <router-link :to="{ name: 'chat' }">
           <v-list-item class="nav-item" prepend-icon="mdi-chat" title="Chat GPT" density="comfortable"></v-list-item>
         </router-link>
       </v-list>
