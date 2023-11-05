@@ -12,6 +12,10 @@
         <router-link :to="{ name: 'chat' }">
           <v-list-item class="nav-item" prepend-icon="mdi-chat" title="Chat GPT" density="comfortable"></v-list-item>
         </router-link>
+        
+        <router-link :to="{ name: 'chat-context' }">
+          <v-list-item class="nav-item" prepend-icon="mdi-account-voice" title="Conversation avec Chat GPT" density="comfortable"></v-list-item>
+        </router-link>
       </v-list>
     </v-navigation-drawer>
 
