@@ -1,15 +1,14 @@
 ﻿namespace IASquad.Poc.AzureOpenAi.Data.Entities;
 
-public enum MessageRole
+public static class MessageRole
 {
-    SYSTEM,
-    USER,
-    ASSISTANT
+    public const int SYSTEM = 0;
+    public const int USER = 1;
+    public const int ASSISTANT = 2;
 }
 
 public class Message
 {
-    public int Id { get; set; }
     public string Value { get; set; }
-    public MessageRole Role { get; set; }
+    public int Role { get; set; }
 }

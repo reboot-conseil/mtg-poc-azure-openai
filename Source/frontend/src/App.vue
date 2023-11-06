@@ -20,7 +20,7 @@
     </v-navigation-drawer>
 
     <v-app-bar>
-      <v-app-bar-title>Démo Azure OpenAi</v-app-bar-title>
+      <v-app-bar-title>Démo Azure OpenAi {{  title ? `- ${title}` : '' }}</v-app-bar-title>
     </v-app-bar>
 
     <v-main class="main">
@@ -28,6 +28,12 @@
     </v-main>
   </v-app>
 </template>
+<script setup>
+import { storeToRefs } from 'pinia';
+import { useTitleStore } from './stores/title';
+
+const { title } = storeToRefs(useTitleStore());
+</script>
 
 <style lang="scss">
 .main {

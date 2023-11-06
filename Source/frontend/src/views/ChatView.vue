@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="wrapper py-0">
+  <v-container fluid class="wrapper pb-0">
     <v-row class="chat-row">
       <v-col cols="12" md="4" class="py-0">
         <div class="chat-container">
@@ -62,7 +62,7 @@
             <v-progress-circular
               v-if="loading"
               indeterminate
-              color="purple"
+              color="blue"
             ></v-progress-circular>
             <div id="bottom" ref="chatContainer"></div>
           </div>
@@ -86,6 +86,10 @@
 import { useChatApi } from '../composables/useChatApi';
 import { format } from 'date-fns';
 import { nextTick,  ref } from 'vue';
+import { useTitleStore } from '../stores/title';
+
+const { setTitle } = useTitleStore();
+setTitle('GPT');
 
 const { ask } = useChatApi();
 const messages = ref([]);

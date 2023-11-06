@@ -1,5 +1,5 @@
-﻿using Azure;
-using Azure.AI.OpenAI;
+﻿using Azure.AI.OpenAI;
+using IASquad.Poc.AzureOpenAi.Data.Entities;
 using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,18 +20,71 @@ public class ChatService : IChatService
     {
         var chatMessages = systemPrompts.Select(sp => new ChatMessage(ChatRole.System, sp)).ToList();
         chatMessages.Add(new ChatMessage(ChatRole.User, userPrompt));
-        Response<ChatCompletions> responseWithoutStream = await _openAIClient.GetChatCompletionsAsync("chat-test",
+        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
             new ChatCompletionsOptions(chatMessages)
             {
                 Temperature = (float)0.7,
-                MaxTokens = 800,
-                NucleusSamplingFactor = (float)0.95,
+                MaxTokens = 1000,
                 FrequencyPenalty = 0,
                 PresencePenalty = 0,
             });
 
-        ChatCompletions completions = responseWithoutStream.Value;
+        var completions = response.Value;
 
         return completions.Choices[0].Message.Content;
+    }
+
+    public async Task<string> GetChatCompletionWithContextAsync(IEnumerable<Message> messages)
+    {
+        var chatMessages = messages.Select(ConvertMessageToChatMessage).ToList();
+        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
+            new ChatCompletionsOptions(chatMessages)
+            {
+                Temperature = (float)0.7,
+                MaxTokens = 1000,
+                FrequencyPenalty = 0,
+                PresencePenalty = 0,
+            });
+
+        var completions = response.Value;
+
+        return completions.Choices[0].Message.Content;
+    }
+
+    public async Task<string> SummarizeContextAsync(IEnumerable<Message> messages)
+    {
+        List<ChatMessage> systemPrompts = new()
+        {
+             new ChatMessage(ChatRole.System, "Résume la conversation suivante en une phrase.")
+        };
+        var chatMessages = messages.Where(m => m.Role != MessageRole.SYSTEM)
+            .Select(ConvertMessageToChatMessage)
+            .ToList();
+
+        chatMessages = systemPrompts.Concat(chatMessages).ToList();
+        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
+            new ChatCompletionsOptions(chatMessages)
+            {
+                Temperature = (float)0.7,
+                MaxTokens = 1000,
+                FrequencyPenalty = 0,
+                PresencePenalty = 0,
+            });
+
+        var completions = response.Value;
+
+        return completions.Choices[0].Message.Content;
+    }
+
+    private ChatMessage ConvertMessageToChatMessage(Message message)
+    {
+        var role = message.Role switch
+        {
+            MessageRole.SYSTEM => ChatRole.System,
+            MessageRole.ASSISTANT => ChatRole.Assistant,
+            MessageRole.USER => ChatRole.User,
+            _ => ChatRole.User,
+        };
+        return new ChatMessage(role, message.Value);
     }
 }

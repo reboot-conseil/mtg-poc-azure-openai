@@ -27,9 +27,6 @@ builder.Services.AddScoped<IImageService, ImageService>();
 
 builder.Services.AddCors();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-  options.UseSqlite(builder.Configuration.GetConnectionString("AppDbContext")));
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -49,7 +46,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 

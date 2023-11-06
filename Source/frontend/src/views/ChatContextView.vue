@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="wrapper py-0">
+  <v-container fluid class="wrapper pb-0">
     <v-row class="chat-row">
       <v-col cols="12" md="4" class="py-0">
         <div class="chat-container">
@@ -82,10 +82,13 @@
 </template>
 
 <script setup>
-import { useChatApi } from '../composables/useChatApi';
+import { useChatApi, MessageRole } from '../composables/useChatApi';
 import { format } from 'date-fns';
 import { nextTick,  ref } from 'vue';
+import { useTitleStore } from '../stores/title';
 
+const { setTitle } = useTitleStore();
+setTitle('GPT avec contexte');
 const { askContext, convertMessages, convertSystemPrompt } = useChatApi();
 const messages = ref([]);
 const systemPrompts = ref([]);
@@ -107,17 +110,15 @@ async function submit() {
 
   loading.value = true;
   const formValues = {
-    massages: [...convertSystemPrompt(systemPrompts.value), ...convertMessages(messages.value)],
+    messages: [...convertSystemPrompt(systemPrompts.value), ...convertMessages(messages.value)],
   };
   question.value = '';
   const response = await askContext(formValues);
   loading.value = false;
 
-  messages.value.push({
-    message: response.replaceAll('\n', '<br>'),
-    date: new Date(),
-    isAnswer: true
-  });
+  convertResponseToMessage(response.messages)
+  systemPrompts.value = response.systemPrompts;
+
   nextTick(() => {
     chatContainer.value.scrollIntoView();
   });
@@ -135,6 +136,16 @@ function addSystemPrompt() {
 
 function removeSystemPrompt(index) {
   systemPrompts.value.pop(index);
+}
+
+function convertResponseToMessage(data) {
+  const newData = data.filter(x => !messages.value.map(m => m.message).includes(x.value))
+  const newMessage = newData.map(nd => ({
+    message: nd.value.replaceAll('\n', '<br>'),
+    isAnswer: nd.role == MessageRole.USER ? false : true,
+    date: new Date(),
+  }));
+  messages.value = messages.value.concat(newMessage);
 }
 
 </script>

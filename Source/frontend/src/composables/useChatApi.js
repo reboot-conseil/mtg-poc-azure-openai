@@ -1,7 +1,7 @@
 import { inject } from 'vue'
 import { AxiosKey } from '../symbols'
 
-const MessageRole = {
+export const MessageRole = {
     SYSTEM: 0,
     USER: 1,
     ASSISTANT: 2

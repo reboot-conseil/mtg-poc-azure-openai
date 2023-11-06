@@ -8,7 +8,7 @@
           >
             <v-text-field
               v-model="prompt"
-              label="prompt"
+              label="Prompt"
               required
             ></v-text-field>
           </v-col>
@@ -29,13 +29,23 @@
       <v-btn color="primary" type="submit">Générer</v-btn>
     </v-form>
 
+    
+    <v-progress-circular
+      v-if="loading"
+      indeterminate
+      color="blue"
+    ></v-progress-circular>
     <img v-if="url" :src="url" alt="Image générée"/>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useImageApi } from '../composables/useImageApi'
+import { useImageApi } from '../composables/useImageApi';
+import { useTitleStore } from '../stores/title';
+
+const { setTitle } = useTitleStore();
+setTitle('Dall-E');
 
 const prompt = ref("");
 const size = ref(1024);
@@ -50,6 +60,7 @@ const items = [{
   text: "1024x1024",
   value: 1024,
 },];
+const loading = ref(false);
 
 const { generateImage } = useImageApi();
 
@@ -58,8 +69,10 @@ const genererImage = async() => {
     prompt: prompt.value,
     size: size.value,
   };
-
+  url.value = null;
+  loading.value = true;
   url.value = await generateImage(data);
+  loading.value = false;
 };
 </script>
 <style lang="scss" scoped>
