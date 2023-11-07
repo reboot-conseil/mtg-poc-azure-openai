@@ -1,4 +1,5 @@
-﻿using IASquad.Poc.AzureOpenAi.Data.Entities;
+﻿using Azure;
+using IASquad.Poc.AzureOpenAi.Data.Entities;
 using IASquad.Poc.AzureOpenAi.Models.Chat;
 using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -29,13 +30,33 @@ public class ChatController : ControllerBase
     [HttpPost("ask-context")]
     public async Task<ActionResult<ChatContextResponseViewModel>> AskContextAsync([FromBody] ChatContextViewModel model)
     {
-        var response = await _chatService.GetChatCompletionWithContextAsync(model.Messages);
-
-        model.Messages.Add(new Message
+        var question = model.Messages.Last();
+        try
         {
-            Role = MessageRole.ASSISTANT,
-            Value = response,
-        });
+            var response = await _chatService.GetChatCompletionWithContextAsync(model.Messages);
+            model.Messages.Add(new Message
+            {
+                Role = MessageRole.ASSISTANT,
+                Value = response,
+            });
+        } catch(RequestFailedException e)
+        {
+            var summary = await _chatService.SummarizeContextAsync(model.Messages);
+            model.Messages.Add(new Message
+            {
+                Role = MessageRole.SYSTEM,
+                Value = summary,
+            });
+
+            model.Messages = model.Messages.Where(m => m.Role == MessageRole.SYSTEM).ToList();
+            model.Messages.Add(question);
+            var response = await _chatService.GetChatCompletionWithContextAsync(model.Messages);
+            model.Messages.Add(new Message
+            {
+                Role = MessageRole.ASSISTANT,
+                Value = response,
+            });
+        }
 
         ChatContextResponseViewModel result = new()
         {

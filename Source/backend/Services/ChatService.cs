@@ -41,7 +41,7 @@ public class ChatService : IChatService
             new ChatCompletionsOptions(chatMessages)
             {
                 Temperature = (float)0.7,
-                MaxTokens = 1000,
+                MaxTokens = 10000,
                 FrequencyPenalty = 0,
                 PresencePenalty = 0,
             });
@@ -55,11 +55,15 @@ public class ChatService : IChatService
     {
         List<ChatMessage> systemPrompts = new()
         {
-             new ChatMessage(ChatRole.System, "Résume la conversation suivante en une phrase.")
+             new ChatMessage(ChatRole.System, "Résume la conversation suivante en un court paragraphe d'environ 150 mots."),
+             new ChatMessage(ChatRole.System, "la conversation est délimitée par ```"),
         };
         var chatMessages = messages.Where(m => m.Role != MessageRole.SYSTEM)
             .Select(ConvertMessageToChatMessage)
             .ToList();
+
+        chatMessages[0].Content = "```" + chatMessages[0].Content;
+        chatMessages.Last().Content = chatMessages[0].Content + "```";
 
         chatMessages = systemPrompts.Concat(chatMessages).ToList();
         var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
