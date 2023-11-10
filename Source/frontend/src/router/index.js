@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import DalleView from '../views/DalleView.vue'
 import ChatView from '../views/ChatView.vue'
 import ChatContextView from '../views/ChatContextView.vue'
+import ChatFunctionCallView from '../views/ChatFunctionCallView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -26,6 +27,11 @@ const router = createRouter({
       path: '/chat/context',
       name: 'chat-context',
       component: ChatContextView
+    },
+    {
+      path: '/chat/function-call',
+      name: 'chat-function-call',
+      component: ChatFunctionCallView
     },
   ]
 })

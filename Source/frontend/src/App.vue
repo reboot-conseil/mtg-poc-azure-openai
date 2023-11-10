@@ -10,11 +10,14 @@
           <v-list-item class="nav-item" prepend-icon="mdi-image-edit" title="Dall-E" density="comfortable"></v-list-item>
         </router-link>
         <router-link :to="{ name: 'chat' }">
-          <v-list-item class="nav-item" prepend-icon="mdi-chat" title="Chat GPT" density="comfortable"></v-list-item>
+          <v-list-item class="nav-item" prepend-icon="mdi-chat" title="Base documentaire - Chat GPT" density="comfortable"></v-list-item>
         </router-link>
         
         <router-link :to="{ name: 'chat-context' }">
           <v-list-item class="nav-item" prepend-icon="mdi-account-voice" title="Conversation avec Chat GPT" density="comfortable"></v-list-item>
+        </router-link>
+        <router-link :to="{ name: 'chat-function-call' }">
+          <v-list-item class="nav-item" prepend-icon="mdi-account-voice" title="Appel externe - Chat GPT" density="comfortable"></v-list-item>
         </router-link>
       </v-list>
     </v-navigation-drawer>

@@ -27,6 +27,14 @@ public class ChatController : ControllerBase
         return Ok(response);
     }
 
+    [HttpPost("ask-function-call")]
+    public async Task<ActionResult<string>> AskFunctionCallAsync([FromBody] ChatAskViewModel model)
+    {
+        var response = await _chatService.GetChatCompletionWithFunctionCallAsync(model.SystemPrompts, model.Question);
+
+        return Ok(response);
+    }
+
     [HttpPost("ask-context")]
     public async Task<ActionResult<ChatContextResponseViewModel>> AskContextAsync([FromBody] ChatContextViewModel model)
     {

@@ -11,4 +11,6 @@ public interface IChatService
     Task<string> GetChatCompletionWithContextAsync(IEnumerable<Message> messages);
 
     Task<string> SummarizeContextAsync(IEnumerable<Message> messages);
+
+    Task<string> GetChatCompletionWithFunctionCallAsync(IEnumerable<string> systemPrompts, string userPrompt);
 }

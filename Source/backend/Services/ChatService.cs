@@ -1,8 +1,10 @@
 ﻿using Azure.AI.OpenAI;
 using IASquad.Poc.AzureOpenAi.Data.Entities;
+using IASquad.Poc.AzureOpenAi.Data.Functions;
 using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace IASquad.Poc.AzureOpenAi.Services;
@@ -32,6 +34,70 @@ public class ChatService : IChatService
         var completions = response.Value;
 
         return completions.Choices[0].Message.Content;
+    }
+
+    public async Task<string> GetChatCompletionWithFunctionCallAsync(IEnumerable<string> systemPrompts, string userPrompt)
+    {
+        var chatMessages = systemPrompts.Select(sp => new ChatMessage(ChatRole.System, sp)).ToList();
+
+
+        ChatCompletions response;
+        ChatChoice responseChoice;
+
+        // Ajoute les fonctions supplémentaires
+        FunctionDefinition getWeatherFuntionDefinition = GetWeatherFunction.GetFunctionDefinition();
+        chatMessages.Add(new ChatMessage(ChatRole.User, userPrompt));
+        ChatCompletionsOptions chatCompletionsOptions = new(chatMessages)
+        {
+            Temperature = (float)0.7,
+            MaxTokens = 1000,
+            FrequencyPenalty = 0,
+            PresencePenalty = 0,
+        };
+        chatCompletionsOptions.Functions.Add(getWeatherFuntionDefinition);
+
+        response =
+                await _openAIClient.GetChatCompletionsAsync(
+                    "gpt-35-turbo-16k",
+                    chatCompletionsOptions);
+
+        responseChoice = response.Choices[0];
+
+        while (responseChoice.FinishReason == CompletionsFinishReason.FunctionCall)
+        {
+            // Tant qu'on detecte un function call, on l'ajoute
+            chatCompletionsOptions.Messages.Add(responseChoice.Message);
+
+            if (responseChoice.Message.FunctionCall.Name == GetWeatherFunction.Name)
+            {
+                string parametres = responseChoice.Message.FunctionCall.Arguments;
+
+                WeatherInput input = JsonSerializer.Deserialize<WeatherInput>(parametres,
+                        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+
+                //On appelle la fonction qu'on souhaite appelé pour récupérer la donnée
+                var resultatFonction = GetWeatherFunction.GetWeather(input.Location, input.Unit);
+
+                // On ajoute la réponse à la conversation
+                var messageReponse = new ChatMessage(
+                    ChatRole.Function,
+                    JsonSerializer.Serialize(
+                        resultatFonction,
+                        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                {
+                    Name = GetWeatherFunction.Name
+                };
+                chatCompletionsOptions.Messages.Add(messageReponse);
+            }
+
+            response = await _openAIClient.GetChatCompletionsAsync(
+                    "gpt-35-turbo-16k",
+                    chatCompletionsOptions);
+
+            responseChoice = response.Choices[0];
+        }
+
+        return responseChoice.Message.Content;
     }
 
     public async Task<string> GetChatCompletionWithContextAsync(IEnumerable<Message> messages)

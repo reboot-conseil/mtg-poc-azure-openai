@@ -14,6 +14,11 @@ export const useChatApi = () => {
     return response.data;
   };
 
+  const askFunctionCall = async (data) => {
+    const response = await axios.post("chat/ask-function-call", data);
+    return response.data;
+  };
+
   const askContext = async (data) => {
     const response = await axios.post("chat/ask-context", data);
     return response.data;
@@ -36,6 +41,7 @@ export const useChatApi = () => {
   return {
     ask,
     askContext,
+    askFunctionCall,
     convertSystemPrompt,
     convertMessages
   }
