@@ -68,7 +68,7 @@
           <div class="chat-input">
             <v-textarea
               v-model="question"
-              label="Que souhaites tu demander à la base de connaissances ?"
+              label="Que souhaites tu demander ?"
               variant="solo-filled"
               append-icon="mdi-send"
               @keyup.enter="submit"

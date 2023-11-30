@@ -1,6 +1,6 @@
 <template>
   <div>
-    Working...
+    Bienvenue à cette session du MTG Strasbourg
   </div>
 </template>
 <script setup>
