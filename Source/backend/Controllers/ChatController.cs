@@ -41,6 +41,7 @@ public class ChatController : ControllerBase
         var question = model.Messages.Last();
         try
         {
+            // On essaie de répondre
             var response = await _chatService.GetChatCompletionWithContextAsync(model.Messages);
             model.Messages.Add(new Message
             {
@@ -49,7 +50,10 @@ public class ChatController : ControllerBase
             });
         } catch(RequestFailedException e)
         {
+            // Si on a une erreur car l'input + complétions dépasse le nombre max de tokens, on résume la conversation
+
             var summary = await _chatService.SummarizeContextAsync(model.Messages);
+            // Prompt système car c'est du contexte !
             model.Messages.Add(new Message
             {
                 Role = MessageRole.SYSTEM,
@@ -58,6 +62,7 @@ public class ChatController : ControllerBase
 
             model.Messages = model.Messages.Where(m => m.Role == MessageRole.SYSTEM).ToList();
             model.Messages.Add(question);
+            // Et on repart du résumé
             var response = await _chatService.GetChatCompletionWithContextAsync(model.Messages);
             model.Messages.Add(new Message
             {

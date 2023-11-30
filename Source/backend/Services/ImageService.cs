@@ -24,7 +24,7 @@ public class ImageService : IImageService
                 Size = size,
             });
 
-        // Image Generations responses provide URLs you can use to retrieve requested images
+        // On récupère l'URl de l'image générée pour l'afficher
         Uri imageUri = imageGenerations.Value.Data[0].Url;
 
         return imageUri.ToString();
