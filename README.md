@@ -18,7 +18,23 @@ Yohann
 
 ## Did we reach the goal ?
 
+Le but a été atteint, on a utilisé le SDK d'Azure OpenAI et le service d'Azure pour créer un Chatbot. Le code est disponible dans les services du backend.
+Le repository inclut le PowerPoint qui a été présenté à la session du 30 novembre au Microsoft Tech Group de Strasbourg.
+La démo consiste à faire tourner les deux applications, s'assurer que le backend a bien accès à une instance d'Azure OpenAI.
+
+Une piste possible d'amélioration est de tester si le SDK .NET d'Azure OpenAI est compatible avec la plateforme d'OpenAI
+
+Aussi un Let's Talk public est prévu le 18 janvier 2024, reprennant la session qui a été faite au MTG.
+
+Sur les 4 objectifs bonus, 3 ont été remplis, il n'est à priori pas possible d'entrainer un modèle de LLM avec notre base de connaissance, mais Azure prévoit un mécanisme similaire basé sur Azure AI Search (précédemment Azure Cognitives Search). La base de connaissance est ensuite déployé sur une instance du chat
+
 ## Conclusion
+
+Date de réaction de la conclusion : 13/12/2023
+
+Nous avons maintenant une bonne base de code pour intégrer Azure OpenAI dans une application en .NET et de quoi discuter de ce service d'Azure et de quoi montrer ce qu'on sait faire avec.
+
+Le repo est public sur le GitHub de Reboot et il y a déjà 2 talks qui ont été planifiés / faits. 
 
 
 # Infos générales
