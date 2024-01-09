@@ -20,10 +20,10 @@ public class ChatService : IChatService
 
     public async Task<string> GetChatCompletionAsync(IEnumerable<string> systemPrompts, string userPrompt)
     {
-        var chatMessages = systemPrompts.Select(sp => new ChatMessage(ChatRole.System, sp)).ToList();
-        chatMessages.Add(new ChatMessage(ChatRole.User, userPrompt));
-        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
-            new ChatCompletionsOptions(chatMessages)
+        List<ChatRequestMessage> chatMessages = systemPrompts.Select(sp => new ChatRequestSystemMessage(sp) as ChatRequestMessage).ToList();
+        chatMessages.Add(new ChatRequestUserMessage(userPrompt));
+        var response = await _openAIClient.GetChatCompletionsAsync(
+            new ChatCompletionsOptions("chat-test", chatMessages)
             {
                 Temperature = (float)0.7,
                 MaxTokens = 1000,
@@ -38,7 +38,7 @@ public class ChatService : IChatService
 
     public async Task<string> GetChatCompletionWithFunctionCallAsync(IEnumerable<string> systemPrompts, string userPrompt)
     {
-        var chatMessages = systemPrompts.Select(sp => new ChatMessage(ChatRole.System, sp)).ToList();
+        var chatMessages = systemPrompts.Select(sp => new ChatRequestSystemMessage(sp) as ChatRequestMessage).ToList();
 
 
         ChatCompletions response;
@@ -46,8 +46,8 @@ public class ChatService : IChatService
 
         // Ajoute les fonctions supplémentaires au prompt
         FunctionDefinition getWeatherFuntionDefinition = GetWeatherFunction.GetFunctionDefinition();
-        chatMessages.Add(new ChatMessage(ChatRole.User, userPrompt));
-        ChatCompletionsOptions chatCompletionsOptions = new(chatMessages)
+        chatMessages.Add(new ChatRequestUserMessage(userPrompt));
+        var chatCompletionsOptions = new ChatCompletionsOptions("gpt-35-turbo-16k", chatMessages)
         {
             Temperature = (float)0.7,
             MaxTokens = 1000,
@@ -58,16 +58,17 @@ public class ChatService : IChatService
 
         // On appelle l'API d'Azure OpenAI avec le prompt
         response =
-                await _openAIClient.GetChatCompletionsAsync(
-                    "gpt-35-turbo-16k",
-                    chatCompletionsOptions);
+                await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
 
         responseChoice = response.Choices[0];
 
         while (responseChoice.FinishReason == CompletionsFinishReason.FunctionCall)
         {
             // Tant qu'on detecte un function call, on l'ajoute
-            chatCompletionsOptions.Messages.Add(responseChoice.Message);
+            chatCompletionsOptions.Messages.Add(new ChatRequestAssistantMessage(responseChoice.Message.Content)
+            {
+                FunctionCall = responseChoice.Message.FunctionCall,
+            });
 
             if (responseChoice.Message.FunctionCall.Name == GetWeatherFunction.Name)
             {
@@ -80,21 +81,19 @@ public class ChatService : IChatService
                 var resultatFonction = GetWeatherFunction.GetWeather(input.Location, input.Unit);
 
                 // On ajoute la réponse à la conversation
-                var messageReponse = new ChatMessage(
-                    ChatRole.Function,
-                    JsonSerializer.Serialize(
+                var functionResponseMessage = new ChatRequestFunctionMessage(
+                    name: responseChoice.Message.FunctionCall.Name,
+                    content: JsonSerializer.Serialize(
                         resultatFonction,
-                        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
-                {
-                    Name = GetWeatherFunction.Name
-                };
-                chatCompletionsOptions.Messages.Add(messageReponse);
+                        new JsonSerializerOptions() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                    )
+                );
+
+                chatCompletionsOptions.Messages.Add(functionResponseMessage);
             }
 
             // On rappelle l'API pour avoir la réponse de GPT
-            response = await _openAIClient.GetChatCompletionsAsync(
-                    "gpt-35-turbo-16k",
-                    chatCompletionsOptions);
+            response = await _openAIClient.GetChatCompletionsAsync(chatCompletionsOptions);
 
             responseChoice = response.Choices[0];
         }
@@ -107,8 +106,8 @@ public class ChatService : IChatService
         // Conversion des messages en Messages pour GPT
         var chatMessages = messages.Select(ConvertMessageToChatMessage).ToList();
 
-        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
-            new ChatCompletionsOptions(chatMessages)
+        var response = await _openAIClient.GetChatCompletionsAsync(
+            new ChatCompletionsOptions("chat-test", chatMessages)
             {
                 Temperature = (float)0.7,
                 MaxTokens = 10000,
@@ -126,24 +125,24 @@ public class ChatService : IChatService
         // Résume une conversation pour rester dans la limite de 160000 tokens (input + completions)
 
         // Nos prompts système pour résumer la conversation
-        List<ChatMessage> systemPrompts = new()
+        List<ChatRequestMessage> systemPrompts = new()
         {
-             new ChatMessage(ChatRole.System, "Résume la conversation suivante en un court paragraphe d'environ 150 mots."),
-             new ChatMessage(ChatRole.System, "la conversation est délimitée par ```"),
+            new ChatRequestSystemMessage("Résume la conversation suivante en un court paragraphe d'environ 150 mots."),
+            new ChatRequestSystemMessage("la conversation est délimitée par ```"),
         };
 
         // Ajoute les délimiteurs de la conversation
+        messages.First().Value = "```" + messages.First().Value;
+        messages.Last().Value = messages.Last().Value + "```";
+
         var chatMessages = messages.Where(m => m.Role != MessageRole.SYSTEM)
             .Select(ConvertMessageToChatMessage)
             .ToList();
 
-        chatMessages[0].Content = "```" + chatMessages[0].Content;
-        chatMessages.Last().Content = chatMessages.Last().Content + "```";
-
         chatMessages = systemPrompts.Concat(chatMessages).ToList();
         // On demande à GPT de nous résumer la conversation
-        var response = await _openAIClient.GetChatCompletionsAsync("chat-test",
-            new ChatCompletionsOptions(chatMessages)
+        var response = await _openAIClient.GetChatCompletionsAsync(
+            new ChatCompletionsOptions("chat-test", chatMessages)
             {
                 Temperature = (float)0.7,
                 MaxTokens = 1000,
@@ -156,16 +155,15 @@ public class ChatService : IChatService
         return completions.Choices[0].Message.Content;
     }
 
-    private ChatMessage ConvertMessageToChatMessage(Message message)
+    private ChatRequestMessage ConvertMessageToChatMessage(Message message)
     {
         // Converti mes messages en messages pour le SDK
-        var role = message.Role switch
+        return message.Role switch
         {
-            MessageRole.SYSTEM => ChatRole.System,
-            MessageRole.ASSISTANT => ChatRole.Assistant,
-            MessageRole.USER => ChatRole.User,
-            _ => ChatRole.User,
+            MessageRole.SYSTEM => new ChatRequestSystemMessage(message.Value),
+            MessageRole.ASSISTANT => new ChatRequestAssistantMessage(message.Value),
+            MessageRole.USER => new ChatRequestUserMessage(message.Value),
+            _ => new ChatRequestUserMessage(message.Value),
         };
-        return new ChatMessage(role, message.Value);
     }
 }

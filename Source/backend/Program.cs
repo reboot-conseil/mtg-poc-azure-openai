@@ -1,10 +1,8 @@
 using Azure;
 using Azure.AI.OpenAI;
-using IASquad.Poc.AzureOpenAi.Data;
 using IASquad.Poc.AzureOpenAi.Services;
 using IASquad.Poc.AzureOpenAi.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
