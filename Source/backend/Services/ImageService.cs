@@ -20,6 +20,7 @@ public class ImageService : IImageService
         Response<ImageGenerations> imageGenerations = await _openAIClient.GetImageGenerationsAsync(
             new ImageGenerationOptions()
             {
+                DeploymentName= "Dalle3",
                 Prompt = prompt,
                 Size = size,
             });

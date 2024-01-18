@@ -47,7 +47,7 @@ public class ChatService : IChatService
         // Ajoute les fonctions supplémentaires au prompt
         FunctionDefinition getWeatherFuntionDefinition = GetWeatherFunction.GetFunctionDefinition();
         chatMessages.Add(new ChatRequestUserMessage(userPrompt));
-        var chatCompletionsOptions = new ChatCompletionsOptions("gpt-35-turbo-16k", chatMessages)
+        var chatCompletionsOptions = new ChatCompletionsOptions("gpt-4-32k", chatMessages)
         {
             Temperature = (float)0.7,
             MaxTokens = 1000,
